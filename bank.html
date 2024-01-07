@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/bank.css" type="text/css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <title>Калькулятор вкладов</title>
+</head>
+<body>
+    <div class="page">
+        <div class="sidebar">
+            <textarea name="info" class="sidebar-text" readonly></textarea>
+        </div>
+        <div class="combobox">
+            <p>
+                <select class="first" name="type" id="type">
+                    <option value="t0" disabled selected>Вид вклада</option>
+                    <option value="t1">Пополняемый</option>
+                    <option value="t2">Срочный</option>
+                </select>
+            </p>
+            <p>
+                <select class="second" name="period" id="period">
+                    <option value="header" selected>Срок вклада</option>
+                </select>
+            </p>
+            <p>
+                <textarea name="deposit" class="deposit_area"></textarea>
+            </p>
+            <p class="btn">
+                <input class="button" type="submit" value="Расчитать">
+            </p>
+        </div>
+        <script>
+            $(document).ready(function() {
+                $('#period').attr('disabled', true);
+                $('#type').on('change', function() {
+                    var array_t1 = {
+                        t1_0: 'Срок вклада',
+                        t1_1: '6 месяцев', 
+                        t1_2: '1 год', 
+                        t1_3: '1,5 года', 
+                        t1_4: '2 года'};
+                    var array_t2 = {
+                        t2_0: 'Срок вклада',
+                        t2_1: '3 месяца', 
+                        t2_2: '6 месяцев', 
+                        t2_3: '9 месяцев', 
+                        t2_4: '1 год', 
+                        t2_5: '1,5 года', 
+                        t2_6: '2 года'};
+                    var text_type = $('#type option:selected').text(),
+                    text_period = $('#period option:selected').text();
+                    var key_type = $('#type option:selected').val(),
+                    key_period = $('#period option:selected').val();
+                    if (text_type == 'Вид вклада') {
+                        $('#period').empty();
+                        $('#period').append('<option value="header">Срок вклада</option>');
+                        $('#period').attr('disabled', true);
+                    } else {
+                        $('#period').attr('disabled', false);
+                        if (key_type == "t1") {
+                            $('#period').empty();
+                            $.each(array_t1, function(key, value) {
+                                if (key == 't1_0') {
+                                    $('#period').append('<option value="' + key + '" disabled selected>' + value + '</option>');
+                                } else {
+                                    $('#period').append('<option value="' + key + '">' + value + '</option>');
+                                }
+                            });
+                        } else {
+                            $('#period').empty();
+                            $.each(array_t2, function(key, value) {
+                                if (key == 't2_0') {
+                                    $('#period').append('<option value="' + key + '" disabled selected>' + value + '</option>');
+                                } else {
+                                    $('#period').append('<option value="' + key + '">' + value + '</option>');
+                                }
+                            });
+                        }
+                    }
+                });
+                $('.button').on('click', function() {
+                    var select1_percent = {
+                        t1_1: '0.2',
+                        t1_2: '0.22', 
+                        t1_3: '0.15', 
+                        t1_4: '0.1', 
+                    };
+                    var select2_percent = {
+                        t2_1: '0.2', 
+                        t2_2: '0.22', 
+                        t2_3: '0.23', 
+                        t2_4: '0.24', 
+                        t2_5: '0.18', 
+                        t2_6: '0.15'
+                    };
+                    var select1_time = {
+                        t1_1: '6',
+                        t1_2: '12', 
+                        t1_3: '18', 
+                        t1_4: '24', 
+                    };
+                    var select2_time = {
+                        t2_1: '3', 
+                        t2_2: '6', 
+                        t2_3: '9', 
+                        t2_4: '12', 
+                        t2_5: '18', 
+                        t2_6: '24'
+                    };
+                    $sum = parseInt($('.deposit_area').val());
+                    $select = $('#period option:selected').val();
+                    $key_type = $('#type option:selected').val();
+                    if($select == 't1_0' || $select == 't2_0' || $select == 'header' || $key_type == 't0' || $('.deposit_area').val() == "") {
+                        $('.sidebar-text').html('Выбраны неверные данные, проверьте, пожалуйста, правильность указанной информации и повторите попытку.')
+                    } else {
+                        if ($key_type == 't1') {
+                            $.each(select1_percent, function(key, value) {
+                                if ($select == key) {
+                                    $percent = parseFloat(value);
+                                }
+                            });
+                            $.each(select1_time, function(key, value) {
+                                if ($select == key) {
+                                    $time = parseInt(value);
+                                }
+                            });
+                        } else {
+                            $.each(select2_percent, function(key, value) {
+                                if ($select == key) {
+                                    $percent = parseFloat(value);
+                                }
+                            });
+                            $.each(select2_time, function(key, value) {
+                                if ($select == key) {
+                                    $time = parseInt(value);
+                                }
+                            });
+                        }
+                        var sum = parseFloat($('.deposit_area').val())
+                        var result = $sum * (1 + $time * $percent / 12);
+                        var type = $('#type option:selected').text();
+                        var srok = $('#period option:selected').text();
+                        $('.sidebar-text').val('При пополнении вклада "'+ String(type) + '" на сумму ' + String(sum.toFixed(1)) + ' рубля(ей) сроком на ' + String(srok) + ' вы заработаете ' + String(result.toFixed(1)) + ' рубля(ей). Чистый доход составит ' + String((result - sum).toFixed(1)) + ' рубля(ей).');
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
